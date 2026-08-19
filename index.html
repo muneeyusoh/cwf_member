@@ -4,15 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ระบบสมาชิกกองทุนสวัสดิการชุมชน</title>
-  
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  
   <style>
-    /* CSS แบบแอปการเงิน Fintech (อ้างอิงจาก Source 7 ของคุณ) */
     :root { --fintech-primary: #0F172A; --fintech-accent: #2563EB; --fintech-success: #10B981; --bg-light: #F3F4F6; --card-border: #E5E7EB; }
     body { background-color: var(--bg-light); font-family: 'Prompt', sans-serif; color: #1E293B; -webkit-tap-highlight-color: transparent; }
     .app-header { background: var(--fintech-primary); background-image: radial-gradient(circle at top right, #1E293B 0%, transparent 60%); color: white; padding: 40px 20px 100px; text-align: center; }
@@ -23,7 +20,6 @@
     .status-pending { background-color: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; } .status-active { background-color: #D1FAE5; color: #059669; border: 1px solid #A7F3D0; } .status-inactive { background-color: #FEE2E2; color: #DC2626; border: 1px solid #FECACA; }
     .badge-tier { padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: white; display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .stat-card { border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; transition: transform 0.2s, box-shadow 0.2s; }
-    .stat-card:active { transform: scale(0.98); }
     .stat-card-points { background: linear-gradient(135deg, #FFFBEB 0%, #FEF08A 100%); border: 1px solid #FDE047; box-shadow: 0 4px 15px rgba(253, 224, 71, 0.2); }
     .stat-card-contrib { background: linear-gradient(135deg, #ECFDF5 0%, #A7F3D0 100%); border: 1px solid #6EE7B7; box-shadow: 0 4px 15px rgba(110, 231, 183, 0.2); }
     .stat-card-welfare { background: linear-gradient(135deg, #EFF6FF 0%, #BFDBFE 100%); border: 1px solid #93C5FD; box-shadow: 0 4px 15px rgba(147, 197, 253, 0.2); }
@@ -36,15 +32,14 @@
     .mission-hub { background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border: 1px solid #334155; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3); }
     .mission-hub .hub-title { color: #F8FAFC !important; } .mission-hub .hub-icon { color: #60A5FA !important; text-shadow: 0 0 10px rgba(96, 165, 250, 0.5); }
     .mission-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 15px 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.2s; backdrop-filter: blur(10px); }
-    .mission-btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3); }
-    .mission-btn span { color: white !important; } .mission-btn i.text-success { color: #34D399 !important; text-shadow: 0 0 15px rgba(52, 211, 153, 0.4); } .mission-btn i.text-primary { color: #60A5FA !important; text-shadow: 0 0 15px rgba(96, 165, 250, 0.4); }
+    .mission-btn span { color: white !important; } .mission-btn i.text-success { color: #34D399 !important; } .mission-btn i.text-primary { color: #60A5FA !important; }
     .info-list { background: white; border-radius: 16px; border: 1px solid var(--card-border); margin-bottom: 20px; overflow: hidden; }
     .info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #F3F4F6; } .info-row:last-child { border-bottom: none; }
     .info-label { color: #6B7280; font-size: 0.85rem; font-weight: 500; } .info-data { color: #111827; font-size: 0.9rem; font-weight: 600; text-align: right; }
     .section-title { font-size: 0.95rem; font-weight: 700; color: #374151; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; text-align: left; }
     .form-control, .form-select { border-radius: 12px; border: 1px solid #D1D5DB; background-color: white; font-size: 0.95rem; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
     .form-control:focus, .form-select:focus { border-color: var(--fintech-accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
-    .btn-fintech { background-color: var(--fintech-primary); color: white; border-radius: 14px; padding: 14px; font-weight: 600; font-size: 1.05rem; border: none; transition: 0.3s; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2); }
+    .btn-fintech { background-color: var(--fintech-primary); color: white; border-radius: 14px; padding: 14px; font-weight: 600; font-size: 1.05rem; border: none; width: 100%; transition: 0.3s; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2); }
     .pdpa-box { background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 16px; padding: 16px; font-size: 0.85rem; text-align: left; }
     #systemLoading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
   </style>
@@ -52,16 +47,15 @@
 <body>
 <div id="systemLoading">
   <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--fintech-primary);" role="status"></div>
-  <p class="text-dark fw-bold" id="loadingText">กำลังเชื่อมต่อระบบ...</p>
+  <p class="text-dark fw-bold" id="loadingText">กำลังตรวจสอบเส้นทาง...</p>
 </div>
 
 <div class="app-header">
-  <h4 class="fw-bold mb-1">กองทุนสวัสดิการชุมชน</h4>
-  <p class="text-white-50 small mb-0">ระบบเครือข่ายสวัสดิการแห่งชาติ</p>
+  <h4 class="fw-bold mb-1">เครือข่ายสวัสดิการแห่งชาติ</h4>
+  <p class="text-white-50 small mb-0">ระบบสมาร์ทรีจิสเตอร์</p>
 </div>
 
 <div class="container mb-5 px-3">
-  
   <!-- 📝 Register View (ระบบส่วนกลาง) -->
   <div id="registerView" class="card-box" style="display: none;">
     <div class="text-center mb-4">
@@ -180,7 +174,6 @@
       </div>
     </div>
     
-    <!-- 🎮 Mission Hub -->
     <div class="mission-hub text-start">
       <div class="d-flex align-items-center mb-3">
         <i class="fa-solid fa-gamepad hub-icon fs-5 me-2"></i>
@@ -218,7 +211,7 @@
 </div>
 
 <script>
-  // 🔑 ใส่ LIFF ID ฝั่งชาวบ้าน
+  // 🔑 ใส่ LIFF ID หน้าแรกของคุณ
   const LIFF_ID = "2010977535-YsYO2i2t"; 
   // 🔑 ใส่ URL ของ Master Hub (ระบบกลาง)
   const CENTRAL_API_URL = "https://script.google.com/macros/s/AKfycbxDpvQtOu9XX4CpEdZKPJTJN34WLMUBK9344-n-w3I1ul9VwdCLG9-l2-_vXTXoaOM55g/exec"; 
@@ -243,16 +236,14 @@
     }
   });
 
-  // 🚀 ระบบ Smart Routing (เช็คว่าเคยสมัครกองทุนไหนไว้)
+  // 🚀 ระบบ Smart Routing
   async function routeUser(uid, pictureUrl) {
-    // 1. ถ้ามี API ท้องถิ่นเก็บไว้ในเครื่องแล้ว วิ่งเข้าหาโดยตรงเลย (Zero-Latency)
     if (LOCAL_API_URL) {
       await checkStatusFromLocal(uid, pictureUrl);
       return;
     }
     
-    // 2. ถ้าไม่มี ให้ไปถามระบบกลาง
-    document.getElementById('loadingText').innerText = "กำลังตรวจสอบเส้นทาง...";
+    document.getElementById('loadingText').innerText = "กำลังตรวจสอบเครือข่าย...";
     try {
       const routeRes = await fetch(CENTRAL_API_URL, { 
         method: "POST", body: JSON.stringify({ action: "getUserRoute", uid: uid }) 
@@ -263,7 +254,6 @@
         localStorage.setItem('cwf_user_api', LOCAL_API_URL);
         await checkStatusFromLocal(uid, pictureUrl);
       } else {
-        // 3. ถ้ายังไม่เคยสมัคร ให้เปิดหน้าฟอร์ม
         await showRegistrationForm();
       }
     } catch (e) {
@@ -273,7 +263,7 @@
 
   // 🏦 ดึงข้อมูลสมุดบัญชีจากระบบท้องถิ่น
   async function checkStatusFromLocal(uid, pictureUrl) {
-    document.getElementById('loadingText').innerText = "กำลังซิงค์สมุดบัญชี...";
+    document.getElementById('loadingText').innerText = "กำลังซิงค์ข้อมูลบัญชี...";
     try {
       const response = await fetch(LOCAL_API_URL, { method: "POST", body: JSON.stringify({ action: "checkStatus", uid: uid }) }).then(r => r.json());
       document.getElementById('systemLoading').style.display = 'none';
@@ -282,7 +272,6 @@
         cachedUserData = response.memberData;
         renderDashboardData(response.memberData, pictureUrl);
       } else { 
-        // แปลว่าโดนลบข้อมูลออกจากท้องถิ่น ให้เคลียร์ของเดิมและให้สมัครใหม่
         localStorage.removeItem('cwf_user_api');
         LOCAL_API_URL = null;
         await showRegistrationForm();
@@ -295,7 +284,7 @@
 
   // 📝 แสดงหน้าฟอร์มลงทะเบียน
   async function showRegistrationForm() {
-    document.getElementById('loadingText').innerText = "กำลังเตรียมใบสมัคร...";
+    document.getElementById('loadingText').innerText = "กำลังโหลดข้อมูลพื้นที่...";
     requestLocation();
     try {
       const res = await fetch(CENTRAL_API_URL, { method: "POST", body: JSON.stringify({ action: "getAvailableNetworks" }) }).then(r=>r.json());
@@ -336,23 +325,58 @@
     }
   }
 
+  // 🚀 ฟังก์ชันลงทะเบียนแบบ "หน่วงเวลา (Sync Delay) 3 วินาที"
   async function handleCentralRegister(e) {
     e.preventDefault(); 
     const btn = document.getElementById('submitRegBtn'); 
     btn.disabled = true; btn.innerHTML = 'กำลังประมวลผล...';
+    
     const payload = Object.fromEntries(new FormData(e.target).entries()); 
-    payload.nationalId = payload.nationalId.replace(/\D/g, ''); payload.phone = payload.phone.replace(/\D/g, '');
+    payload.nationalId = payload.nationalId.replace(/\D/g, ''); 
+    payload.phone = payload.phone.replace(/\D/g, '');
+    
     if (payload.nationalId.length !== 13) { Swal.fire('แจ้งเตือน', 'เลข ปชช. ต้องมี 13 หลัก', 'warning'); btn.disabled = false; btn.innerHTML = 'สมัครเข้าสู่กองทุน'; return; }
     
     try {
       const res = await fetch(CENTRAL_API_URL, { method: "POST", body: JSON.stringify(payload) }).then(r=>r.json());
+      
       if (res.status === 'success') {
-        Swal.fire({ title: 'ลงทะเบียนสำเร็จ!', text: 'ระบบจะนำท่านเข้าสู่สมุดบัญชี', icon: 'success' }).then(() => { location.reload(); }); 
-      } else { Swal.fire('ข้อผิดพลาด', res.message, 'error'); btn.disabled = false; btn.innerHTML = 'สมัครเข้าสู่กองทุน'; }
-    } catch (e) { Swal.fire('Error', 'ไม่สามารถเชื่อมต่อระบบกลางได้', 'error'); btn.disabled = false; btn.innerHTML = 'สมัครเข้าสู่กองทุน'; }
+        // ⏳ 1. ซ่อนฟอร์ม โชว์โหลดดิ้ง และหน่วงเวลา 3 วินาที รอให้ Google Sheets บันทึกเสร็จ
+        document.getElementById('registerView').style.display = 'none';
+        document.getElementById('systemLoading').style.display = 'flex';
+        document.getElementById('loadingText').innerText = "กำลังสร้างสมุดบัญชีดิจิทัล... (รอสักครู่)";
+        
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // 🔄 2. ถาม Master Hub กลับไปว่า ลิงก์ API ของตำบลคืออะไร
+        const routeRes = await fetch(CENTRAL_API_URL, { 
+          method: "POST", body: JSON.stringify({ action: "getUserRoute", uid: payload.uid }) 
+        }).then(r => r.json());
+        
+        if (routeRes.status === 'success') {
+          // 3. เซฟ API ตำบลลงเครื่อง
+          LOCAL_API_URL = routeRes.apiUrl;
+          localStorage.setItem('cwf_user_api', LOCAL_API_URL);
+          
+          // 4. วิ่งไปดึงข้อมูลมาโชว์ทันที
+          const pic = document.getElementById('userAvatar').src || "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/icons/person-circle.svg";
+          await checkStatusFromLocal(payload.uid, pic);
+          Swal.fire({ title: 'สำเร็จ!', text: 'ยินดีต้อนรับเข้าสู่สมุดบัญชี', icon: 'success' });
+        } else {
+          Swal.fire('ข้อผิดพลาด', 'บันทึกสำเร็จ แต่สลับสายไม่ได้ โปรดเข้าเมนูใหม่อีกครั้ง', 'warning').then(()=>liff.closeWindow());
+        }
+
+      } else { 
+        Swal.fire('ข้อผิดพลาด', res.message, 'error'); 
+        btn.disabled = false; btn.innerHTML = 'สมัครเข้าสู่กองทุน'; 
+      }
+    } catch (e) { 
+      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อระบบกลางได้', 'error'); 
+      btn.disabled = false; btn.innerHTML = 'สมัครเข้าสู่กองทุน'; 
+    }
   }
 
-  // 🎨 จัดการหน้าจอ Dashboard (โค้ดเดิมของคุณ)
+  // 🎨 จัดการหน้าจอ Dashboard
   function renderDashboardData(data, pictureUrl) {
     document.getElementById('userAvatar').src = pictureUrl;
     document.getElementById('dashName').innerText = (data.prefix || "") + " " + data.fullName;
