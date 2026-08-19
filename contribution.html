@@ -4,24 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>สมทบเงินกองทุน | CWF</title>
-  
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  
   <style>
     :root { --fintech-primary: #0A2540; --fintech-accent: #3B82F6; --fintech-success: #10B981; --bg-light: #F8FAFC; }
     body { background-color: var(--bg-light); font-family: 'Prompt', sans-serif; color: #1E293B; padding-bottom: 40px; }
-    
     .app-header { background: linear-gradient(135deg, var(--fintech-primary), #1e3a8a); color: white; padding: 30px 20px 50px; text-align: center; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 4px 15px rgba(10, 37, 64, 0.15); }
     #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-    
     .card-box { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); max-width: 500px; margin: -35px auto 20px; position: relative; border: 1px solid #E2E8F0; }
     .capsule-contrib { background: linear-gradient(135deg, #10B981, #059669); border-radius: 18px; padding: 20px 24px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; box-shadow: 0 8px 15px -3px rgba(16, 185, 129, 0.3); }
     .outstanding-text { font-size: 0.85rem; font-weight: 700; color: #EF4444; padding-left: 10px; margin-bottom: 24px; }
-    
     .payment-option { border: 2px solid #E2E8F0; border-radius: 16px; padding: 16px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; background: #FFFFFF; }
     .payment-option:active { transform: scale(0.98); }
     .payment-option.active { border-color: var(--fintech-accent); background-color: #EFF6FF; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.1); }
@@ -32,7 +27,6 @@
     .form-control, .form-select { border-radius: 12px; border: 1px solid #CBD5E1; background-color: #F8FAFC; font-size: 0.95rem; padding: 14px; font-weight: 600; }
     .form-control:focus, .form-select:focus { background-color: #FFFFFF; border-color: var(--fintech-accent); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
     .btn-fintech { background-color: var(--fintech-primary); color: white; border-radius: 14px; padding: 16px; font-weight: 700; font-size: 1.05rem; border: none; transition: 0.3s; box-shadow: 0 4px 10px rgba(10,37,64,0.3); }
-    
     .dynamic-section { display: none; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -48,12 +42,11 @@
     <button onclick="liff.closeWindow()" class="btn btn-sm btn-outline-light rounded-circle px-2 py-1 me-2 border-0"><i class="fa-solid fa-arrow-left"></i></button>
     <h5 class="fw-bold mb-0">สมทบเงินกองทุนรายปี</h5>
   </div>
-  <p class="opacity-75 small mb-0 text-start ps-4">ระบบจัดการสวัสดิการชุมชน</p>
+  <p class="opacity-75 small mb-0 text-start ps-4">ระบบเครือข่ายสวัสดิการแห่งชาติ</p>
 </div>
 
 <div class="container mb-5">
   <div class="card-box">
-    
     <div class="capsule-contrib text-start">
       <div>
         <small class="opacity-90 d-block fw-bold">ยอดสมทบสะสมแล้ว</small>
@@ -76,7 +69,6 @@
       </div>
       
       <label class="small text-muted fw-bold mb-2">ช่องทางการสมทบเงิน</label>
-      
       <label class="payment-option opt-transfer" id="lblTransfer">
         <input class="form-check-input" type="radio" name="paymentType" value="transfer" onchange="togglePaymentSection()" required>
         <div class="icon-box"><i class="fa-solid fa-money-bill-transfer"></i></div>
@@ -106,7 +98,6 @@
         <select class="form-select" id="committeeSelect" name="committeeName">
           <option value="" disabled selected>-- โหลดรายชื่อกรรมการ --</option>
         </select>
-        <small class="text-muted d-block mt-2" style="font-size:0.75rem;">(อ้างอิงรายชื่อจากศูนย์ประสานงานของคุณแบบอัตโนมัติ)</small>
       </div>
       
       <button type="submit" class="btn btn-fintech w-100 mt-4" id="submitBtn"><i class="fa-solid fa-paper-plane me-2"></i> ยืนยันทำรายการ</button>
@@ -115,26 +106,20 @@
 </div>
 
 <script>
-  // ⚠️ 1. ใส่ LINE LIFF ID ของหน้าสมทบเงิน
   const LIFF_ID = "2010977535-b13rVtsp"; 
-  // 🌟 2. URL ของ Master Hub (กรณีต้องถามทาง)
   const CENTRAL_API_URL = "https://script.google.com/macros/s/AKfycbxDpvQtOu9XX4CpEdZKPJTJN34WLMUBK9344-n-w3I1ul9VwdCLG9-l2-_vXTXoaOM55g/exec"; 
   
-  // ⚡ ดึง API ตำบลจาก Local Storage เพื่อความรวดเร็ว
   let GAS_API_URL = localStorage.getItem('cwf_user_api'); 
   let maxAllowed = 0;
-  let userCenter = "";
   let dynamicCommitteeList = [];
 
   document.addEventListener("DOMContentLoaded", async () => {
     try {
       await liff.init({ liffId: LIFF_ID });
-      
       if (liff.isLoggedIn()) {
         const profile = await liff.getProfile();
         document.getElementById('uid').value = profile.userId;
         
-        // ⚡ ตรวจสอบว่ามี API เครื่องข่ายหรือยัง ถ้ายังไม่มีให้ไปดึงจากส่วนกลาง
         if (!GAS_API_URL) {
             const routeRes = await fetch(CENTRAL_API_URL, { 
                 method: "POST", body: JSON.stringify({ action: "getUserRoute", uid: profile.userId }) 
@@ -149,33 +134,25 @@
             }
         }
         
-        // ⚡ ยิงตรงเข้าฐานข้อมูลตำบลทันที
         const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify({ action: "checkStatus", uid: profile.userId }) }).then(r=>r.json());
-        
         document.getElementById('loader').style.display = 'none';
+        
         if(res.status === 'registered') {
           document.getElementById('fullName').value = res.memberData.fullName;
           document.getElementById('dashTotalContrib').innerText = (res.memberData.totalContribution || 0).toLocaleString();
-          
           maxAllowed = res.memberData.outstandingBalance || 0;
           document.getElementById('debtText').innerText = maxAllowed.toLocaleString();
           document.getElementById('amount').max = maxAllowed;
-          
-          userCenter = res.memberData.center;
           dynamicCommitteeList = res.memberData.committeeList || ["ไม่มีข้อมูลกรรมการในศูนย์นี้ (โปรดติดต่อแอดมิน)"];
           
           if(maxAllowed <= 0) {
             Swal.fire({ title: 'ยอดเยี่ยม', text: 'คุณสมทบครบถ้วนแล้ว ไม่มียอดค้างชำระในปีนี้ครับ', icon: 'success', confirmButtonColor: '#10B981' }).then(()=>liff.closeWindow());
           }
         } else {
-          // กรณีเปลี่ยนพื้นที่ หรือโดนลบข้อมูล ให้เคลียร์ค่าเดิมแล้วแจ้งเตือน
           localStorage.removeItem('cwf_user_api');
           Swal.fire('ข้อผิดพลาด', 'ไม่พบข้อมูลสมาชิกของคุณในระบบ', 'error').then(()=>liff.closeWindow());
         }
-
-      } else { 
-        liff.login(); 
-      }
+      } else { liff.login(); }
     } catch (err) { 
         document.getElementById('loader').style.display = 'none';
         Swal.fire('Error', 'เซิร์ฟเวอร์ขัดข้อง โปรดลองใหม่ภายหลัง', 'error');
@@ -215,9 +192,7 @@
     select.innerHTML = '<option value="" disabled selected>-- โปรดเลือกชื่อกรรมการ --</option>';
     dynamicCommitteeList.forEach(name => {
       const option = document.createElement('option');
-      option.value = name;
-      option.text = name;
-      select.appendChild(option);
+      option.value = name; option.text = name; select.appendChild(option);
     });
   }
 
@@ -225,21 +200,15 @@
     const f = input.files[0]; 
     if (!f) return;
     document.getElementById('slipFileName').value = f.name; 
-    
     const reader = new FileReader(); 
     reader.onload = function(e) {
       const img = new Image();
       img.onload = function() {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800; 
-        let scaleSize = 1;
+        const MAX_WIDTH = 800; let scaleSize = 1;
         if (img.width > MAX_WIDTH) scaleSize = MAX_WIDTH / img.width;
-        
-        canvas.width = img.width * scaleSize;
-        canvas.height = img.height * scaleSize;
-        
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.width = img.width * scaleSize; canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         document.getElementById('slipBase64').value = canvas.toDataURL('image/webp', 0.7); 
       }
       img.src = e.target.result;
@@ -250,35 +219,27 @@
   async function submitContrib(e) {
     e.preventDefault(); 
     const btn = document.getElementById('submitBtn'); 
-    btn.disabled = true; 
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>กำลังอัปโหลดข้อมูล...';
+    btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>กำลังอัปโหลดข้อมูล...';
     
     const formDataObj = Object.fromEntries(new FormData(e.target));
-    
     if (formDataObj.paymentType === 'transfer') {
       formDataObj.paymentMethod = "โอนเงินผ่านธนาคาร";
       if (!formDataObj.slipBase64) {
         Swal.fire('แจ้งเตือน', 'กรุณาแนบสลิปการโอนเงิน', 'warning');
-        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> ยืนยันทำรายการ';
-        return;
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> ยืนยันทำรายการ'; return;
       }
     } else if (formDataObj.paymentType === 'cash') {
       formDataObj.paymentMethod = "เงินสดผ่านกรรมการ (" + formDataObj.committeeName + ")";
-      delete formDataObj.slipBase64; 
-      delete formDataObj.slipFileName;
+      delete formDataObj.slipBase64; delete formDataObj.slipFileName;
     }
     
     try {
       const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(formDataObj) }).then(r=>r.json());
       if(res.status === 'success') {
         Swal.fire({ title: 'สำเร็จ', text: 'บันทึกรายการเรียบร้อย คณะกรรมการกำลังตรวจสอบครับ', icon: 'success', confirmButtonColor: '#10B981' }).then(()=>liff.closeWindow());
-      } else { 
-        Swal.fire('ข้อผิดพลาด', res.message, 'error'); 
-        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> ยืนยันทำรายการ'; 
-      }
+      } else { Swal.fire('ข้อผิดพลาด', res.message, 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> ยืนยันทำรายการ'; }
     } catch (err) {
-      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error'); 
-      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> ยืนยันทำรายการ';
+      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> ยืนยันทำรายการ';
     }
   }
 </script>
