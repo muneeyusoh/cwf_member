@@ -4,22 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ระบบสมาชิกกองทุนสวัสดิการชุมชน</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <!-- 🚀 โหลดระบบ Firebase เข้ามาในหน้าเว็บ -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+  
   <style>
-    :root { --fintech-primary: #0F172A; --fintech-accent: #2563EB; --fintech-success: #10B981; --bg-light: #F3F4F6; --card-border: #E5E7EB; }
+    :root { 
+      --fintech-primary: #0F172A; 
+      --fintech-accent: #2563EB; 
+      --fintech-success: #10B981; 
+      --bg-light: #F3F4F6;
+      --card-border: #E5E7EB;
+    }
     body { background-color: var(--bg-light); font-family: 'Prompt', sans-serif; color: #1E293B; -webkit-tap-highlight-color: transparent; }
+    
+    /* 📱 Modern Header & Card Setup */
     .app-header { background: var(--fintech-primary); background-image: radial-gradient(circle at top right, #1E293B 0%, transparent 60%); color: white; padding: 40px 20px 100px; text-align: center; }
     .card-box { background: white; padding: 25px 20px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); max-width: 500px; margin: -60px auto 30px; position: relative; border: 1px solid var(--card-border); }
     .profile-wrapper { position: relative; margin-top: -65px; text-align: center; margin-bottom: 15px; }
     .profile-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid white; background: white; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+    
+    /* 🌟 Status & Tier Badge */
     .badge-status { padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-block; margin-bottom: 15px; }
-    .status-pending { background-color: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; } .status-active { background-color: #D1FAE5; color: #059669; border: 1px solid #A7F3D0; } .status-inactive { background-color: #FEE2E2; color: #DC2626; border: 1px solid #FECACA; }
+    .status-pending { background-color: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; } 
+    .status-active { background-color: #D1FAE5; color: #059669; border: 1px solid #A7F3D0; } 
+    .status-inactive { background-color: #FEE2E2; color: #DC2626; border: 1px solid #FECACA; } 
     .badge-tier { padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: white; display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    
+    /* 💳 Clean FinTech Stat Cards */
     .stat-card { border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; transition: transform 0.2s, box-shadow 0.2s; }
+    .stat-card:active { transform: scale(0.98); }
     .stat-card-points { background: linear-gradient(135deg, #FFFBEB 0%, #FEF08A 100%); border: 1px solid #FDE047; box-shadow: 0 4px 15px rgba(253, 224, 71, 0.2); }
     .stat-card-contrib { background: linear-gradient(135deg, #ECFDF5 0%, #A7F3D0 100%); border: 1px solid #6EE7B7; box-shadow: 0 4px 15px rgba(110, 231, 183, 0.2); }
     .stat-card-welfare { background: linear-gradient(135deg, #EFF6FF 0%, #BFDBFE 100%); border: 1px solid #93C5FD; box-shadow: 0 4px 15px rgba(147, 197, 253, 0.2); }
@@ -27,103 +50,113 @@
     .stat-card-points .icon-box { background: #F59E0B; color: white; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4); }
     .stat-card-contrib .icon-box { background: #10B981; color: white; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); }
     .stat-card-welfare .icon-box { background: #3B82F6; color: white; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); }
-    .btn-action-sm { background: white; border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .stat-card-points .btn-action-sm { color: #D97706; border: 1px solid #FDE047; } .stat-card-contrib .btn-action-sm { color: #059669; border: 1px solid #6EE7B7; } .stat-card-welfare .btn-action-sm { color: #2563EB; border: 1px solid #93C5FD; }
+    .btn-action-sm { background: white; border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: none;}
+    .stat-card-points .btn-action-sm { color: #D97706; border: 1px solid #FDE047; }
+    .stat-card-contrib .btn-action-sm { color: #059669; border: 1px solid #6EE7B7; }
+    .stat-card-welfare .btn-action-sm { color: #2563EB; border: 1px solid #93C5FD; }
+    
+    /* 🎮 Mission Hub Styling */
     .mission-hub { background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border: 1px solid #334155; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.3); }
-    .mission-hub .hub-title { color: #F8FAFC !important; } .mission-hub .hub-icon { color: #60A5FA !important; text-shadow: 0 0 10px rgba(96, 165, 250, 0.5); }
+    .mission-hub .hub-title { color: #F8FAFC !important; }
+    .mission-hub .hub-icon { color: #60A5FA !important; text-shadow: 0 0 10px rgba(96, 165, 250, 0.5); }
     .mission-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 15px 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: 0.2s; backdrop-filter: blur(10px); }
-    .mission-btn span { color: white !important; } .mission-btn i.text-success { color: #34D399 !important; } .mission-btn i.text-primary { color: #60A5FA !important; }
+    .mission-btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.3); }
+    .mission-btn span { color: white !important; }
+    .mission-btn i.text-success { color: #34D399 !important; text-shadow: 0 0 15px rgba(52, 211, 153, 0.4); }
+    .mission-btn i.text-primary { color: #60A5FA !important; text-shadow: 0 0 15px rgba(96, 165, 250, 0.4); }
+    
+    /* 📋 Member Info Section */
     .info-list { background: white; border-radius: 16px; border: 1px solid var(--card-border); margin-bottom: 20px; overflow: hidden; }
-    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #F3F4F6; } .info-row:last-child { border-bottom: none; }
-    .info-label { color: #6B7280; font-size: 0.85rem; font-weight: 500; } .info-data { color: #111827; font-size: 0.9rem; font-weight: 600; text-align: right; }
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid #F3F4F6; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #6B7280; font-size: 0.85rem; font-weight: 500; }
+    .info-data { color: #111827; font-size: 0.9rem; font-weight: 600; text-align: right; }
+    
+    /* ⚙️ General Setup */
     .section-title { font-size: 0.95rem; font-weight: 700; color: #374151; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; text-align: left; }
     .form-control, .form-select { border-radius: 12px; border: 1px solid #D1D5DB; background-color: white; font-size: 0.95rem; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
     .form-control:focus, .form-select:focus { border-color: var(--fintech-accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
-    .btn-fintech { background-color: var(--fintech-primary); color: white; border-radius: 14px; padding: 14px; font-weight: 600; font-size: 1.05rem; border: none; width: 100%; transition: 0.3s; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2); }
+    .form-control:read-only { background-color: #F3F4F6; color: #6B7280; border-color: #E5E7EB; }
+    .btn-fintech { background-color: var(--fintech-primary); color: white; border-radius: 14px; padding: 14px; font-weight: 600; font-size: 1.05rem; border: none; transition: 0.3s; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2); }
+    
+    /* 🌟 PDPA & GIS Box Style */
     .pdpa-box { background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 16px; padding: 16px; font-size: 0.85rem; text-align: left; }
     #systemLoading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
   </style>
 </head>
 <body>
+
 <div id="systemLoading">
   <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--fintech-primary);" role="status"></div>
-  <p class="text-dark fw-bold" id="loadingText">กำลังตรวจสอบเส้นทาง...</p>
+  <p class="text-dark fw-bold">กำลังเชื่อมต่อฐานข้อมูล Firestore...</p>
 </div>
 
 <div class="app-header">
-  <h4 class="fw-bold mb-1">เครือข่ายสวัสดิการแห่งชาติ</h4>
-  <p class="text-white-50 small mb-0">ระบบสมาร์ทรีจิสเตอร์</p>
+  <h4 class="fw-bold mb-1">กองทุนสวัสดิการชุมชน</h4>
+  <p class="text-white-50 small mb-0" id="headerFundName">เทศบาลตำบลสุคิริน จังหวัดนราธิวาส</p>
 </div>
 
 <div class="container mb-5 px-3">
-  <!-- 📝 Register View (ระบบส่วนกลาง) -->
+  
+  <!-- 📝 Register View -->
   <div id="registerView" class="card-box" style="display: none;">
     <div class="text-center mb-4">
-      <div class="icon-box bg-primary bg-opacity-10 text-primary mx-auto mb-3" style="width: 60px; height: 60px; font-size: 1.5rem;"><i class="fa-solid fa-user-plus"></i></div>
-      <h5 class="fw-bold text-dark mb-1">สมาร์ทรีจิสเตอร์</h5>
-      <p class="text-muted small">เลือกลงทะเบียนเข้าสู่กองทุนที่มี MOU ในพื้นที่ของคุณ</p>
+      <div class="icon-box bg-primary bg-opacity-10 text-primary mx-auto mb-3"><i class="fa-solid fa-user-plus"></i></div>
+      <h5 class="fw-bold text-dark mb-1">ลงทะเบียนสมาชิกใหม่</h5>
+      <p class="text-muted small">กรอกข้อมูลให้ครบถ้วนเพื่อรับสิทธิประโยชน์</p>
     </div>
     
-    <form id="centralRegisterForm" onsubmit="handleCentralRegister(event)">
-      <input type="hidden" name="action" value="centralRegister"> 
+    <form id="registerForm" onsubmit="handleRegister(event)">
       <input type="hidden" id="uid" name="uid">
+      <input type="hidden" id="refCode" name="refCode"> 
       <input type="hidden" id="regLatitude" name="latitude">
       <input type="hidden" id="regLongitude" name="longitude">
-      <input type="hidden" id="refCode" name="refCode"> 
-      
+
       <div class="row g-2 mb-3">
         <div class="col-4">
           <select class="form-select" name="prefix" required>
             <option value="" disabled selected>คำนำหน้า</option>
-            <option value="นาย">นาย</option><option value="นาง">นาง</option><option value="นางสาว">นางสาว</option><option value="ด.ญ.">ด.ญ.</option><option value="ด.ช.">ด.ช.</option>
+            <option value="นาย">นาย</option><option value="นาง">นาง</option><option value="นางสาว">นางสาว</option>
           </select>
         </div>
         <div class="col-8">
           <input type="text" class="form-control" name="fullName" placeholder="ชื่อ-นามสกุล" required>
         </div>
       </div>
-      
       <div class="mb-3">
         <input type="tel" class="form-control fw-bold" name="nationalId" placeholder="เลขประจำตัวประชาชน (13 หลัก)" maxlength="13" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 13);" required>
       </div>
-      
       <div class="mb-3">
         <input type="tel" class="form-control" name="phone" placeholder="เบอร์โทรศัพท์ (08XXXXXXXX)" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);" required>
       </div>
       
-      <hr class="my-4 border-light">
-      
       <div class="mb-3">
-        <label class="small text-muted fw-bold ms-1 mb-1">1. เลือกกองทุนสวัสดิการพื้นที่ (MOU)</label>
-        <select class="form-select fw-bold text-primary" id="mouNetworkSelect" name="subdistrict" onchange="fetchLocalCenters()" required>
-          <option value="" disabled selected>-- กำลังโหลดพื้นที่ให้บริการ --</option>
+        <select class="form-select fw-bold text-dark" name="center" id="regCenterSelect" required>
+          <option value="" disabled selected>-- เลือกศูนย์ประสานงานใกล้บ้าน --</option>
         </select>
       </div>
       
-      <div class="mb-4" id="localCenterBox" style="display: none;">
-        <label class="small text-muted fw-bold ms-1 mb-1">2. เลือกศูนย์ประสานงานใกล้บ้านท่าน</label>
-        <select class="form-select text-dark" id="localCenterSelect" name="center" required></select>
+      <div class="mb-4">
+        <select class="form-select text-dark" name="village" id="regVillageSelect" required>
+          <option value="" disabled selected>-- เลือกหมู่บ้านที่พักอาศัยปัจจุบัน --</option>
+        </select>
       </div>
 
-      <div class="mb-4" id="localVillageBox" style="display: none;">
-        <label class="small text-muted fw-bold ms-1 mb-1">3. หมู่บ้านที่พักอาศัย</label>
-        <input type="text" class="form-control" name="village" placeholder="เช่น บ้านมาโมง" required>
-      </div>
-      
       <div class="pdpa-box mb-4">
         <div class="form-check">
           <input class="form-check-input mt-1" type="checkbox" name="pdpaConsent" id="pdpaCheck" value="true" required>
-          <label class="form-check-label text-muted ms-1" for="pdpaCheck" style="line-height: 1.4;">
-            <strong class="text-dark">นโยบายความเป็นส่วนตัว (PDPA)</strong><br>
-            ข้าพเจ้ายินยอมให้จัดเก็บข้อมูลและพิกัด (GPS) เพื่อส่งต่อไปยังกองทุนสวัสดิการที่เลือก
+          <label class="form-check-label text-muted ms-1" for="pdpaCheck">
+            <strong>นโยบายความเป็นส่วนตัว (PDPA)</strong><br>
+            ยินยอมให้จัดเก็บข้อมูลส่วนบุคคลและพิกัดภูมิศาสตร์ (GPS) เพื่อพิจารณาสิทธิประโยชน์
           </label>
         </div>
       </div>
-      <button type="submit" class="btn btn-fintech w-100" id="submitRegBtn">สมัครเข้าสู่กองทุน</button>
+
+      <button type="submit" class="btn btn-fintech w-100" id="submitRegBtn">สมัครสมาชิก</button>
     </form>
   </div>
 
-  <!-- 📊 Dashboard View (ดึงข้อมูลจากระบบท้องถิ่น) -->
+  <!-- 📊 Dashboard View -->
   <div id="dashboardView" class="card-box text-center" style="display: none;">
     <div class="profile-wrapper">
       <img id="userAvatar" src="" class="profile-img" alt="Profile">
@@ -134,9 +167,12 @@
     <p class="text-muted small mb-2"><i class="fa-solid fa-location-dot me-1"></i><span id="dashCenterText"></span></p>
     
     <div id="dashTierBadge" class="badge-tier" style="display: none;"></div>
+
     <hr class="my-4" style="border-color: #E5E7EB;">
     
     <div class="d-flex flex-column gap-2 mb-4">
+      
+      <!-- 🎁 Stat Card 1: CWF Points -->
       <div class="stat-card stat-card-points text-start m-0">
         <div class="d-flex align-items-center gap-3">
           <div class="icon-box"><i class="fa-solid fa-star"></i></div>
@@ -147,10 +183,11 @@
         </div>
         <button onclick="shareRefLink()" class="btn-action-sm"><i class="fa-solid fa-share-nodes"></i> ชวนเพื่อน</button>
       </div>
-      
+
+      <!-- 💰 Stat Card 2: Contributions -->
       <div class="stat-card stat-card-contrib text-start m-0 position-relative">
         <div class="d-flex align-items-center gap-3">
-          <div class="icon-box"><i class="fa-solid fa-piggy-bank"></i></div>
+          <div class="icon-box"><i class="fa-solid fa-coins"></i></div>
           <div>
             <small class="fw-bold d-block lh-1 mb-1" style="color: #065F46;">ยอดสมทบสะสม</small>
             <h4 class="fw-bold mb-0 text-dark"><span id="dashTotalContrib">0</span> <small class="fs-6 fw-normal" style="color: #065F46;">฿</small></h4>
@@ -161,7 +198,8 @@
         </div>
         <a href="contribution.html" class="btn-action-sm text-decoration-none"><i class="fa-solid fa-plus"></i> สมทบ</a>
       </div>
-      
+
+      <!-- 🏥 Stat Card 3: Welfare -->
       <div class="stat-card stat-card-welfare text-start m-0">
         <div class="d-flex align-items-center gap-3">
           <div class="icon-box"><i class="fa-solid fa-hand-holding-heart"></i></div>
@@ -173,7 +211,8 @@
         <a href="claim.html" class="btn-action-sm text-decoration-none"><i class="fa-solid fa-file-medical"></i> ขอเบิก</a>
       </div>
     </div>
-    
+
+    <!-- 🎮 Mission Hub -->
     <div class="mission-hub text-start">
       <div class="d-flex align-items-center mb-3">
         <i class="fa-solid fa-gamepad hub-icon fs-5 me-2"></i>
@@ -181,22 +220,26 @@
       </div>
       <div class="row g-2">
         <div class="col-6 text-center">
-          <div class="mission-btn" onclick="dailyCheckIn()" role="button">
+          <button class="mission-btn w-100" onclick="dailyCheckIn()">
             <i class="fa-solid fa-calendar-check d-block fs-3 mb-2 text-success"></i>
             <span class="small fw-bold text-dark">เช็คอินรายวัน</span>
-          </div>
+          </button>
         </div>
         <div class="col-6 text-center">
-          <div class="mission-btn" onclick="shareNewsMission()" role="button">
+          <button class="mission-btn w-100" onclick="shareNewsMission()">
             <i class="fa-brands fa-line d-block fs-3 mb-2 text-primary"></i>
             <span class="small fw-bold text-dark">แชร์ข่าวสาร</span>
-          </div>
+          </button>
         </div>
       </div>
     </div>
     
     <div class="text-start mt-4">
-      <div class="section-title m-0 mb-3"><i class="fa-solid fa-id-card text-muted me-2"></i> ข้อมูลส่วนตัว</div>
+      <div class="d-flex justify-content-between align-items-center mb-3 px-1">
+        <div class="section-title m-0"><i class="fa-solid fa-id-card text-muted me-2"></i> ข้อมูลส่วนตัว</div>
+        <button onclick="openProfileEditor()" class="btn btn-light text-primary border-0 rounded-pill px-3 py-1 fw-bold" style="font-size: 0.8rem;"><i class="fa-solid fa-pen me-1"></i> แก้ไข</button>
+      </div>
+      
       <div class="info-list">
         <div class="info-row"><span class="info-label">รหัสสมาชิก</span><span class="info-data text-primary fs-6" id="dashMemberId"></span></div>
         <div class="info-row"><span class="info-label">เลข ปชช.</span><span class="info-data" id="dashNatId"></span></div>
@@ -204,207 +247,383 @@
         <div class="info-row"><span class="info-label">อายุการเป็นสมาชิก</span><span class="info-data text-success" id="dashAgeYears"></span></div>
         <div class="info-row"><span class="info-label">วันที่สมัคร</span><span class="info-data" id="dashDate"></span></div>
       </div>
+
       <div class="section-title px-1 mt-4"><i class="fa-solid fa-clock-rotate-left text-muted me-2"></i> ประวัติรับสวัสดิการล่าสุด</div>
       <div id="dashWelfareList" class="info-list mb-0"></div>
     </div>
   </div>
+
+  <!-- ✏️ Edit Profile View -->
+  <div id="editProfileView" class="card-box" style="display: none;">
+    <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+      <button onclick="closeProfileEditor()" class="btn btn-light rounded-circle me-3 border px-2 py-1"><i class="fa-solid fa-arrow-left"></i></button>
+      <h5 class="fw-bold mb-0 text-dark">แก้ไขข้อมูลส่วนตัว</h5>
+    </div>
+    
+    <form id="editProfileForm" onsubmit="handleProfileUpdate(event)">
+      <input type="hidden" id="editUid" name="uid">
+
+      <div class="section-title"><i class="fa-solid fa-lock text-muted me-2"></i> ข้อมูลระบบ</div>
+      <div class="row g-2 mb-4">
+        <div class="col-6"><label class="small text-muted fw-bold ms-1 mb-1">รหัสสมาชิก</label><input type="text" id="editMemId" class="form-control fw-bold text-primary" readonly></div>
+        <div class="col-6"><label class="small text-muted fw-bold ms-1 mb-1">เลข ปชช.</label><input type="text" id="editNatId" class="form-control" readonly></div>
+      </div>
+
+      <div class="section-title"><i class="fa-solid fa-user text-muted me-2"></i> ข้อมูลบุคคล</div>
+      <div class="row g-2 mb-3">
+        <div class="col-4"><label class="small text-muted fw-bold ms-1 mb-1">คำนำหน้า</label>
+          <select id="editPrefix" name="prefix" class="form-select"><option value="นาย">นาย</option><option value="นาง">นาง</option><option value="นางสาว">นางสาว</option></select>
+        </div>
+        <div class="col-8"><label class="small text-muted fw-bold ms-1 mb-1">ชื่อ-นามสกุล</label><input type="text" id="editName" name="fullName" class="form-control" required></div>
+      </div>
+      <div class="mb-4"><label class="small text-muted fw-bold ms-1 mb-1">วันเกิด</label><input type="date" id="editBirth" name="birthDate" class="form-control"></div>
+
+      <div class="section-title"><i class="fa-solid fa-map-location-dot text-muted me-2"></i> ที่อยู่และการติดต่อ</div>
+      <div class="row g-2 mb-3">
+        <div class="col-6"><label class="small text-muted fw-bold ms-1 mb-1">โทรศัพท์</label><input type="tel" id="editPhone" name="phone" class="form-control" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);"></div>
+        <div class="col-6"><label class="small text-muted fw-bold ms-1 mb-1">อีเมล</label><input type="email" id="editEmail" name="email" class="form-control"></div>
+      </div>
+      
+      <div class="mb-3"><label class="small text-muted fw-bold ms-1 mb-1">หมู่บ้าน</label>
+        <select id="editVillage" name="village" class="form-select"><option value="" disabled>-- เลือกหมู่บ้าน --</option></select>
+      </div>
+      <div class="mb-3"><label class="small text-muted fw-bold ms-1 mb-1">ศูนย์ประสานงาน</label>
+        <select id="editCenter" name="center" class="form-select"></select>
+      </div>
+      <div class="mb-3"><label class="small text-muted fw-bold ms-1 mb-1">บ้านเลขที่</label><textarea id="editAddress" name="address" class="form-control" rows="2"></textarea></div>
+
+      <div class="pdpa-box mb-4">
+        <label class="small text-muted fw-bold mb-2 d-block"><i class="fa-solid fa-location-crosshairs text-danger me-1"></i> ปักหมุดพิกัดบ้าน</label>
+        <div class="d-flex gap-2 mb-2">
+            <input type="text" id="editLatitude" name="latitude" class="form-control form-control-sm text-center" placeholder="ละติจูด" readonly>
+            <input type="text" id="editLongitude" name="longitude" class="form-control form-control-sm text-center" placeholder="ลองจิจูด" readonly>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger w-100 rounded-3" onclick="updateEditLocation(event)"><i class="fa-solid fa-map-pin me-1"></i> ดึงพิกัด GPS ปัจจุบัน</button>
+      </div>
+
+      <div class="section-title"><i class="fa-solid fa-briefcase text-muted me-2"></i> ข้อมูลเศรษฐกิจ</div>
+      <div class="row g-2 mb-3">
+        <div class="col-6"><label class="small text-muted fw-bold ms-1 mb-1">การศึกษา</label>
+          <select id="editEdu" name="education" class="form-select"><option value="">ไม่ระบุ</option><option value="ประถมศึกษา">ประถมศึกษา</option><option value="มัธยมศึกษา">มัธยมศึกษา</option><option value="ปวช./ปวส.">ปวช./ปวส.</option><option value="ปริญญาตรีขึ้นไป">ปริญญาตรีขึ้นไป</option></select>
+        </div>
+        <div class="col-6"><label class="small text-muted fw-bold ms-1 mb-1">อาชีพ</label>
+          <select id="editOcc" name="occupation" class="form-select"><option value="">ไม่ระบุ</option><option value="เกษตรกร">เกษตรกร</option><option value="รับจ้างทั่วไป">รับจ้างทั่วไป</option><option value="ค้าขาย/ธุรกิจส่วนตัว">ค้าขาย/ธุรกิจส่วนตัว</option><option value="พนักงานบริษัท">พนักงานบริษัท</option><option value="ข้าราชการ">ข้าราชการ</option><option value="อื่นๆ">อื่นๆ</option></select>
+        </div>
+      </div>
+      <div class="row g-2 mb-3">
+        <div class="col-4"><label class="small text-muted fw-bold ms-1 mb-1">รายได้/เดือน</label><input type="number" id="editInc" name="income" class="form-control"></div>
+        <div class="col-4"><label class="small text-muted fw-bold ms-1 mb-1">คนในบ้าน</label><input type="number" id="editFam" name="familyMembers" class="form-control"></div>
+        <div class="col-4"><label class="small text-muted fw-bold ms-1 mb-1">ผู้พิการ</label><input type="number" id="editDis" name="disabledPersons" class="form-control"></div>
+      </div>
+      <div class="row g-2 mb-4">
+        <div class="col-6"><label class="small text-muted fw-bold ms-1 mb-1">กรรมสิทธิ์บ้าน</label><select id="editHouseT" name="houseType" class="form-select"><option value="">ไม่ระบุ</option><option value="ของตนเอง">ของตนเอง</option><option value="เช่า">เช่า</option><option value="อาศัยผู้อื่น">อาศัยผู้อื่น</option></select></div>
+        <div class="col-6"><label class="small text-muted fw-bold ms-1 mb-1">สภาพบ้าน</label><select id="editHouseC" name="houseCondition" class="form-select"><option value="">ไม่ระบุ</option><option value="มั่นคง">มั่นคง</option><option value="ปานกลาง">ปานกลาง</option><option value="ทรุดโทรม">ทรุดโทรม</option></select></div>
+      </div>
+
+      <div class="section-title"><i class="fa-solid fa-people-roof text-muted me-2"></i> ผู้รับผลประโยชน์</div>
+      <div class="pdpa-box mb-4">
+        <div class="row g-2 mb-2"><div class="col-7"><input type="text" id="editBen1N" name="beneficiary1_name" class="form-control form-control-sm" placeholder="ชื่อคนที่ 1"></div><div class="col-5"><input type="text" id="editBen1R" name="beneficiary1_relation" class="form-control form-control-sm" placeholder="สถานะ"></div></div>
+        <div class="row g-2 mb-2"><div class="col-7"><input type="text" id="editBen2N" name="beneficiary2_name" class="form-control form-control-sm" placeholder="ชื่อคนที่ 2"></div><div class="col-5"><input type="text" id="editBen2R" name="beneficiary2_relation" class="form-control form-control-sm" placeholder="สถานะ"></div></div>
+        <div class="row g-2"><div class="col-7"><input type="text" id="editBen3N" name="beneficiary3_name" class="form-control form-control-sm" placeholder="ชื่อคนที่ 3"></div><div class="col-5"><input type="text" id="editBen3R" name="beneficiary3_relation" class="form-control form-control-sm" placeholder="สถานะ"></div></div>
+      </div>
+
+      <button type="submit" class="btn btn-fintech w-100" id="submitEditBtn">บันทึกข้อมูล</button>
+    </form>
+  </div>
+
 </div>
 
 <script>
-  // 🔑 ใส่ LIFF ID หน้าแรกของคุณ
-  const LIFF_ID = "2010977535-YsYO2i2t"; 
-  // 🔑 ใส่ URL ของ Master Hub (ระบบกลาง)
-  const CENTRAL_API_URL = "https://script.google.com/macros/s/AKfycbxDpvQtOu9XX4CpEdZKPJTJN34WLMUBK9344-n-w3I1ul9VwdCLG9-l2-_vXTXoaOM55g/exec"; 
+  // ==========================================================
+  // ⚙️ 1. ตั้งค่าพื้นฐาน
+  // ==========================================================
+  const CWF_CONFIG = {
+      FUND_NAME: "เทศบาลตำบลสุคิริน", 
+      LIFF_ID: "2010764982-RCKkyPZG", 
+      CENTERS: ["ศูนย์ชุมชนปารีย์", "ศูนย์ชุมชนเกียร์", "ศูนย์ชุมชนราษฎร์สามัคคี", "ศูนย์ชุมชนกลันตัน", "ศูนย์ชุมชนมาโมง", "ศูนย์ชุมชนสุคิริน"],
+      VILLAGES: ["บ้านจารังตาดง", "บ้านมาโมง", "บ้านภูเขาทอง", "บ้านปารีย์", "บ้านเกียร์", "บ้านราษฎร์สามัคคี", "บ้านกลันตัน", "บ้านสุคิริน", "อื่นๆ"]
+  };
+
+  // ==========================================================
+  // 🔑 2. ติดตั้ง Firebase
+  // ==========================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBs1G5k31100g6PeVvU5nUyz0QDB21jHpI",
+    authDomain: "smartwelf-f7d81.firebaseapp.com",
+    projectId: "smartwelf-f7d81",
+    storageBucket: "smartwelf-f7d81.firebasestorage.app",
+    messagingSenderId: "114126831149",
+    appId: "1:114126831149:web:66ea766f6c558b159442a4",
+    measurementId: "G-LGGQC7R7E1"
+  };
+
+  if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
   
-  let LOCAL_API_URL = localStorage.getItem('cwf_user_api'); 
-  let dynamicCentersMap = {};
   let cachedUserData = null;
 
+  // ==========================================================
+  // 🛠️ 3. ระบบทำงานตอนเปิดหน้าเว็บ
+  // ==========================================================
   document.addEventListener("DOMContentLoaded", async () => {
+    const headerTitle = document.getElementById('headerFundName');
+    if(headerTitle) headerTitle.innerText = `${CWF_CONFIG.FUND_NAME} จังหวัดนราธิวาส`;
+
+    // วาด Dropdown
+    const regCenter = document.getElementById('regCenterSelect');
+    if (regCenter) { CWF_CONFIG.CENTERS.forEach(c => regCenter.add(new Option(c, c))); }
+    const editCenter = document.getElementById('editCenter');
+    if (editCenter) { CWF_CONFIG.CENTERS.forEach(c => editCenter.add(new Option(c, c))); }
+    
+    const regVillage = document.getElementById('regVillageSelect');
+    if (regVillage) { CWF_CONFIG.VILLAGES.forEach(v => regVillage.add(new Option(v, v))); }
+    const editVillage = document.getElementById('editVillage');
+    if (editVillage) { CWF_CONFIG.VILLAGES.forEach(v => editVillage.add(new Option(v, v))); }
+
     try {
-      await liff.init({ liffId: LIFF_ID });
+      await liff.init({ liffId: CWF_CONFIG.LIFF_ID });
       const urlParams = new URLSearchParams(window.location.search);
       if(urlParams.get('ref')) document.getElementById('refCode').value = urlParams.get('ref');
-      
+
       if (liff.isLoggedIn()) {
         const profile = await liff.getProfile();
         document.getElementById('uid').value = profile.userId;
-        await routeUser(profile.userId, profile.pictureUrl || "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/icons/person-circle.svg");
+        document.getElementById('editUid').value = profile.userId;
+        await checkMemberOnCloud(profile.userId, profile.pictureUrl || "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/icons/person-circle.svg");
       } else { liff.login(); }
     } catch (err) { 
         document.getElementById('systemLoading').innerHTML = `<div class="text-danger text-center px-4"><h6>System Error</h6><p class="small">${err.message}</p></div>`; 
     }
   });
 
-  // 🚀 ระบบ Smart Routing
-  async function routeUser(uid, pictureUrl) {
-    if (LOCAL_API_URL) {
-      await checkStatusFromLocal(uid, pictureUrl);
-      return;
-    }
-    
-    document.getElementById('loadingText').innerText = "กำลังตรวจสอบเครือข่าย...";
+  // ==========================================================
+  // 💾 4. เชื่อมต่อ Firestore โดยตรง (แทน Google Sheets)
+  // ==========================================================
+  async function checkMemberOnCloud(uid, pictureUrl) {
     try {
-      const routeRes = await fetch(CENTRAL_API_URL, { 
-        method: "POST", body: JSON.stringify({ action: "getUserRoute", uid: uid }) 
-      }).then(r => r.json());
+      // 🚀 ดึงข้อมูลจาก Firestore ตรงๆ
+      const docRef = db.collection("members").doc(uid);
+      const docSnap = await docRef.get();
       
-      if (routeRes.status === 'success') {
-        LOCAL_API_URL = routeRes.apiUrl;
-        localStorage.setItem('cwf_user_api', LOCAL_API_URL);
-        await checkStatusFromLocal(uid, pictureUrl);
-      } else {
-        await showRegistrationForm();
-      }
-    } catch (e) {
-      Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อระบบกลางได้', 'error');
-    }
-  }
-
-  // 🏦 ดึงข้อมูลสมุดบัญชีจากระบบท้องถิ่น
-  async function checkStatusFromLocal(uid, pictureUrl) {
-    document.getElementById('loadingText').innerText = "กำลังซิงค์ข้อมูลบัญชี...";
-    try {
-      const response = await fetch(LOCAL_API_URL, { method: "POST", body: JSON.stringify({ action: "checkStatus", uid: uid }) }).then(r => r.json());
       document.getElementById('systemLoading').style.display = 'none';
-      
-      if (response.status === 'registered') {
-        cachedUserData = response.memberData;
-        renderDashboardData(response.memberData, pictureUrl);
+
+      if (docSnap.exists) {
+        // มีข้อมูลสมาชิกแล้ว
+        const memberData = docSnap.data();
+        cachedUserData = memberData;
+        renderDashboardData(memberData, pictureUrl);
       } else { 
-        localStorage.removeItem('cwf_user_api');
-        LOCAL_API_URL = null;
-        await showRegistrationForm();
+        // ยังไม่มีข้อมูล ให้เปิดหน้าลงทะเบียน
+        document.getElementById('registerView').style.display = 'block'; 
+        requestLocation();
       }
-    } catch (e) { 
-       Swal.fire('เชื่อมต่อไม่สำเร็จ', 'ระบบกองทุนพื้นที่ของท่านอาจมีปัญหา', 'error');
-       document.getElementById('systemLoading').style.display = 'none'; 
+    } catch (error) { 
+       document.getElementById('systemLoading').innerHTML = `<div class="text-danger text-center px-4"><h6>Database Error</h6><p class="small">ไม่สามารถเชื่อมต่อฐานข้อมูลได้</p></div>`;
     }
   }
 
-  // 📝 แสดงหน้าฟอร์มลงทะเบียน
-  async function showRegistrationForm() {
-    document.getElementById('loadingText').innerText = "กำลังโหลดข้อมูลพื้นที่...";
-    requestLocation();
+  // 📝 บันทึกข้อมูลสมาชิกใหม่ลง Firestore
+  async function handleRegister(e) {
+    e.preventDefault(); 
+    const btn = document.getElementById('submitRegBtn'); 
+    btn.disabled = true; btn.innerHTML = 'กำลังบันทึก...';
+    
+    const formData = new FormData(e.target);
+    const payload = Object.fromEntries(formData.entries()); 
+    payload.nationalId = payload.nationalId.replace(/\D/g, ''); 
+    payload.phone = payload.phone.replace(/\D/g, '');
+    
+    if (payload.nationalId.length !== 13) { Swal.fire('เตือน', 'เลข ปชช. ต้องมี 13 หลัก', 'warning'); btn.disabled = false; btn.innerHTML = 'สมัครสมาชิก'; return; }
+    
+    const uid = document.getElementById('uid').value;
+    
+    // สร้างแพ็คเกจข้อมูลเริ่มต้น (Default Data)
+    const newMemberData = {
+        ...payload,
+        memberId: "CWF" + Date.now().toString().slice(-5), // สุ่มเลขสมาชิกชั่วคราว
+        status: "รอตรวจสอบ",
+        cwfPoints: 0,
+        totalContribution: 0,
+        totalWelfareReceived: 0,
+        outstandingBalance: 365, // ค่าตั้งต้นที่ต้องสมทบ
+        welfareHistory: [],
+        timestamp: new Date().toLocaleDateString('th-TH')
+    };
+
     try {
-      const res = await fetch(CENTRAL_API_URL, { method: "POST", body: JSON.stringify({ action: "getAvailableNetworks" }) }).then(r=>r.json());
-      const select = document.getElementById('mouNetworkSelect');
-      if(res.status === 'success' && Object.keys(res.data).length > 0) {
-        dynamicCentersMap = res.data;
-        select.innerHTML = '<option value="" disabled selected>-- เลือกเทศบาล/ตำบล --</option>';
-        Object.keys(dynamicCentersMap).forEach(networkName => {
-          const option = document.createElement('option'); option.value = networkName; option.text = networkName;
-          select.appendChild(option);
-        });
-      } else { select.innerHTML = '<option value="" disabled selected>-- ยังไม่มีเครือข่ายเปิดรับ --</option>'; document.getElementById('submitRegBtn').disabled = true; }
+      // 🚀 บันทึกลง Firestore
+      await db.collection("members").doc(uid).set(newMemberData);
+      Swal.fire('สำเร็จ', 'ลงทะเบียนเข้าสู่ระบบเรียบร้อย', 'success').then(() => location.reload()); 
+    } catch (error) { 
+      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error'); 
+      btn.disabled = false; btn.innerHTML = 'สมัครสมาชิก'; 
+    }
+  }
+
+  // ✏️ อัปเดตข้อมูลส่วนตัว
+  async function handleProfileUpdate(e) {
+    e.preventDefault(); 
+    const btn = document.getElementById('submitEditBtn'); 
+    btn.disabled = true; btn.innerHTML = 'กำลังอัปเดต...';
+    
+    const formData = new FormData(e.target);
+    const payload = Object.fromEntries(formData.entries());
+    const uid = document.getElementById('editUid').value;
+    
+    delete payload.uid; // ไม่ต้องอัปเดต uid ลงไปซ้ำ
+
+    try {
+      // 🚀 อัปเดตเฉพาะฟิลด์ที่มีการเปลี่ยนแปลงลง Firestore
+      await db.collection("members").doc(uid).update(payload);
+      Swal.fire('สำเร็จ', 'อัปเดตข้อมูลเรียบร้อย', 'success').then(() => location.reload()); 
+    } catch (error) { 
+      Swal.fire('Error', 'ไม่สามารถส่งข้อมูลได้', 'error'); 
+      btn.disabled = false; btn.innerHTML = 'บันทึกข้อมูล'; 
+    }
+  }
+
+  // 🎁 ภารกิจรับคะแนน (เพิ่มแต้มทันทีผ่าน Firestore)
+  async function dailyCheckIn() {
+    Swal.fire({ title: 'กำลังเช็คอิน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+    try {
+      const uid = document.getElementById('uid').value;
       
-      document.getElementById('systemLoading').style.display = 'none';
-      document.getElementById('registerView').style.display = 'block';
-    } catch (e) { console.error("Load Network Error:", e); }
+      // 🚀 สั่งบวกคะแนนใน Firestore ตรงๆ
+      await db.collection("members").doc(uid).update({
+          cwfPoints: firebase.firestore.FieldValue.increment(10)
+      });
+      
+      // ดึงคะแนนใหม่มาโชว์
+      const snap = await db.collection("members").doc(uid).get();
+      const newPoints = snap.data().cwfPoints;
+      
+      document.getElementById('dashCwfPoints').innerText = newPoints;
+      updateTierOnScreen(newPoints);
+      Swal.fire({ icon: 'success', title: 'เยี่ยมมาก!', text: 'ได้รับ 10 คะแนนจากการเช็คอิน', confirmButtonColor: '#10B981' });
+    } catch (error) { 
+        Swal.fire('Error', 'ไม่สามารถประมวลผลได้', 'error'); 
+    }
   }
 
-  function fetchLocalCenters() {
-    const selectedNetwork = document.getElementById('mouNetworkSelect').value;
-    const centerSelect = document.getElementById('localCenterSelect');
-    const centers = dynamicCentersMap[selectedNetwork] || ["ศูนย์ประสานงานกลาง"];
-    centerSelect.innerHTML = '<option value="" disabled selected>-- โปรดเลือกศูนย์ประสานงาน --</option>';
-    centers.forEach(cName => {
-      const option = document.createElement('option'); option.value = cName; option.text = cName;
-      centerSelect.appendChild(option);
-    });
-    document.getElementById('localCenterBox').style.display = 'block';
-    document.getElementById('localVillageBox').style.display = 'block';
+  async function shareNewsMission() {
+    if (!liff.isLoggedIn()) { Swal.fire('เตือน', 'กรุณาล็อกอิน', 'warning'); return liff.login(); }
+    if (!liff.isApiAvailable('shareTargetPicker')) { Swal.fire('ขออภัย', 'แชร์ได้บนมือถือเท่านั้น', 'warning'); return; }
+
+    try {
+      const bannerImageUrl = "https://images.unsplash.com/photo-1555421689-d68471e189f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+      const res = await liff.shareTargetPicker([{
+        type: "flex", altText: "ข่าวสารกองทุนสวัสดิการชุมชน",
+        contents: {
+          type: "bubble",
+          hero: { type: "image", url: bannerImageUrl, size: "full", aspectRatio: "20:13", aspectMode: "cover" },
+          body: { type: "box", layout: "vertical", contents: [
+              { type: "text", text: "กองทุนสวัสดิการชุมชน", weight: "bold", size: "sm", color: "#2563EB" },
+              { type: "text", text: "กองทุนเพื่อคุณภาพชีวิต", weight: "bold", size: "xl", margin: "md", wrap: true },
+              { type: "text", text: "มาร่วมสร้างความมั่นคงและคุณภาพชีวิตที่ดี", wrap: true, color: "#6B7280", size: "sm", margin: "md" }
+            ] },
+          footer: { type: "box", layout: "vertical", spacing: "sm", contents: [{ type: "button", style: "primary", height: "sm", color: "#2563EB", action: { type: "uri", label: "เข้าระบบ", uri: `https://liff.line.me/${CWF_CONFIG.LIFF_ID}` } }], flex: 0 }
+        }
+      }]);
+      
+      if (res) {
+        Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+        const uid = document.getElementById('uid').value;
+        
+        // 🚀 สั่งบวกคะแนนใน Firestore ตรงๆ
+        await db.collection("members").doc(uid).update({
+            cwfPoints: firebase.firestore.FieldValue.increment(20)
+        });
+        
+        const snap = await db.collection("members").doc(uid).get();
+        const newPoints = snap.data().cwfPoints;
+        
+        document.getElementById('dashCwfPoints').innerText = newPoints;
+        updateTierOnScreen(newPoints); 
+        Swal.fire({ icon: 'success', title: 'แชร์สำเร็จ!', text: 'ได้รับ 20 คะแนน', confirmButtonColor: '#10B981' });
+      }
+    } catch(e) { console.error(e); }
   }
 
+
+  // ==========================================================
+  // 🎨 ส่วนของการจัดการหน้าตา UI (ไม่ต้องแก้โค้ดส่วนนี้)
+  // ==========================================================
   function requestLocation() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => { document.getElementById('regLatitude').value = pos.coords.latitude; document.getElementById('regLongitude').value = pos.coords.longitude; },
-        (err) => { console.warn("GPS Denied"); }
+        (position) => {
+          document.getElementById('regLatitude').value = position.coords.latitude;
+          document.getElementById('regLongitude').value = position.coords.longitude;
+        },
+        (error) => { console.warn("GPS Error / User Denied:", error); }
       );
     }
   }
 
-  // 🚀 ฟังก์ชันลงทะเบียนแบบ "หน่วงเวลา (Sync Delay) 3 วินาที"
-  async function handleCentralRegister(e) {
-    e.preventDefault(); 
-    const btn = document.getElementById('submitRegBtn'); 
-    btn.disabled = true; btn.innerHTML = 'กำลังประมวลผล...';
+  function updateEditLocation(event) {
+    const btn = event.currentTarget;
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> รอสักครู่...';
+    btn.disabled = true;
     
-    const payload = Object.fromEntries(new FormData(e.target).entries()); 
-    payload.nationalId = payload.nationalId.replace(/\D/g, ''); 
-    payload.phone = payload.phone.replace(/\D/g, '');
-    
-    if (payload.nationalId.length !== 13) { Swal.fire('แจ้งเตือน', 'เลข ปชช. ต้องมี 13 หลัก', 'warning'); btn.disabled = false; btn.innerHTML = 'สมัครเข้าสู่กองทุน'; return; }
-    
-    try {
-      const res = await fetch(CENTRAL_API_URL, { method: "POST", body: JSON.stringify(payload) }).then(r=>r.json());
-      
-      if (res.status === 'success') {
-        // ⏳ 1. ซ่อนฟอร์ม โชว์โหลดดิ้ง และหน่วงเวลา 3 วินาที รอให้ Google Sheets บันทึกเสร็จ
-        document.getElementById('registerView').style.display = 'none';
-        document.getElementById('systemLoading').style.display = 'flex';
-        document.getElementById('loadingText').innerText = "กำลังสร้างสมุดบัญชีดิจิทัล... (รอสักครู่)";
-        
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        // 🔄 2. ถาม Master Hub กลับไปว่า ลิงก์ API ของตำบลคืออะไร
-        const routeRes = await fetch(CENTRAL_API_URL, { 
-          method: "POST", body: JSON.stringify({ action: "getUserRoute", uid: payload.uid }) 
-        }).then(r => r.json());
-        
-        if (routeRes.status === 'success') {
-          // 3. เซฟ API ตำบลลงเครื่อง
-          LOCAL_API_URL = routeRes.apiUrl;
-          localStorage.setItem('cwf_user_api', LOCAL_API_URL);
-          
-          // 4. วิ่งไปดึงข้อมูลมาโชว์ทันที
-          const pic = document.getElementById('userAvatar').src || "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/icons/person-circle.svg";
-          await checkStatusFromLocal(payload.uid, pic);
-          Swal.fire({ title: 'สำเร็จ!', text: 'ยินดีต้อนรับเข้าสู่สมุดบัญชี', icon: 'success' });
-        } else {
-          Swal.fire('ข้อผิดพลาด', 'บันทึกสำเร็จ แต่สลับสายไม่ได้ โปรดเข้าเมนูใหม่อีกครั้ง', 'warning').then(()=>liff.closeWindow());
-        }
-
-      } else { 
-        Swal.fire('ข้อผิดพลาด', res.message, 'error'); 
-        btn.disabled = false; btn.innerHTML = 'สมัครเข้าสู่กองทุน'; 
-      }
-    } catch (e) { 
-      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อระบบกลางได้', 'error'); 
-      btn.disabled = false; btn.innerHTML = 'สมัครเข้าสู่กองทุน'; 
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          document.getElementById('editLatitude').value = position.coords.latitude;
+          document.getElementById('editLongitude').value = position.coords.longitude;
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> สำเร็จ';
+          btn.classList.replace('btn-outline-danger', 'btn-success');
+          setTimeout(() => { btn.innerHTML = originalHtml; btn.disabled = false; btn.classList.replace('btn-success', 'btn-outline-danger'); }, 3000);
+        },
+        (error) => { 
+          Swal.fire('ดึงพิกัดไม่สำเร็จ', 'โปรดเปิด GPS ในโทรศัพท์ของคุณ', 'warning');
+          btn.innerHTML = originalHtml; btn.disabled = false;
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      Swal.fire('ข้อผิดพลาด', 'อุปกรณ์ไม่รองรับ GPS', 'error');
+      btn.innerHTML = originalHtml; btn.disabled = false;
     }
   }
 
-  // 🎨 จัดการหน้าจอ Dashboard
   function renderDashboardData(data, pictureUrl) {
     document.getElementById('userAvatar').src = pictureUrl;
     document.getElementById('dashName').innerText = (data.prefix || "") + " " + data.fullName;
+    
     const tierBadge = document.getElementById('dashTierBadge');
-    if (data.tierName && data.tierColor) { tierBadge.innerHTML = `<i class="fa-solid fa-crown"></i> ${data.tierName}`; tierBadge.style.backgroundColor = data.tierColor; tierBadge.style.display = 'inline-flex'; }
+    if (data.cwfPoints !== undefined) updateTierOnScreen(data.cwfPoints);
+
     document.getElementById('dashCenterText').innerText = " " + (data.center || "สมาชิกกองทุน");
     document.getElementById('dashCwfPoints').innerText = data.cwfPoints || 0;
     
     const badge = document.getElementById('dashStatusBadge');
-    badge.innerText = data.status;
+    badge.innerText = data.status || "รอตรวจสอบ";
     if (data.status === 'เป็นสมาชิก') { badge.className = "badge-status status-active"; } 
-    else if (data.status.includes('รอ') || data.status.includes('ตรวจสอบ')) { badge.className = "badge-status status-pending"; } 
+    else if (data.status === 'รอตรวจสอบ') { badge.className = "badge-status status-pending"; } 
     else { badge.className = "badge-status status-inactive"; }
-    
+
     document.getElementById('dashTotalContrib').innerText = (data.totalContribution || 0).toLocaleString();
     document.getElementById('dashTotalWelfare').innerText = (data.totalWelfareReceived || 0).toLocaleString();
     document.getElementById('dashOutstanding').innerText = (data.outstandingBalance || 0).toLocaleString();
     document.getElementById('dashMemberId').innerText = data.memberId || "-";
     
-    let nId = String(data.nationalId || "").replace(/\D/g, ''); document.getElementById('dashNatId').innerText = nId.length === 13 ? `${nId.substring(0,5)}XXXX${nId.substring(9,13)}` : "-";
-    let pId = String(data.phone || "").replace(/\D/g, ''); document.getElementById('dashPhone').innerText = pId.length === 10 ? `${pId.substring(0,3)}-${pId.substring(3,6)}-${pId.substring(6,10)}` : "-";
+    let nId = String(data.nationalId || "").replace(/\D/g, '');
+    document.getElementById('dashNatId').innerText = nId.length === 13 ? `${nId.substring(0,5)}XXXX${nId.substring(9,13)}` : "-";
+    let pId = String(data.phone || "").replace(/\D/g, '');
+    document.getElementById('dashPhone').innerText = pId.length === 10 ? `${pId.substring(0,3)}-${pId.substring(3,6)}-${pId.substring(6,10)}` : "-";
     
     let ageStr = "รอชำระเงิน";
     if (data.timestamp && data.timestamp !== "-") {
       const parts = data.timestamp.split('/'); 
       if (parts.length === 3) {
-        const regDate = new Date(parts[2], parts[1] - 1, parts[0]); const today = new Date();
-        let years = today.getFullYear() - regDate.getFullYear(); let months = today.getMonth() - regDate.getMonth(); let days = today.getDate() - regDate.getDate();
+        const regDate = new Date(parts[2], parts[1] - 1, parts[0]);
+        const today = new Date();
+        let years = today.getFullYear() - regDate.getFullYear();
+        let months = today.getMonth() - regDate.getMonth();
+        let days = today.getDate() - regDate.getDate();
         if (days < 0) { months--; const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0); days += prevMonth.getDate(); }
         if (months < 0) { years--; months += 12; }
         ageStr = `${years} ปี ${months} ด. ${days} ว.`;
@@ -412,51 +631,64 @@
     }
     document.getElementById('dashAgeYears').innerText = ageStr;
     document.getElementById('dashDate').innerText = data.timestamp || "-";
+
+    const historyList = document.getElementById('dashWelfareList');
+    historyList.innerHTML = "";
+    if((data.welfareHistory || []).length === 0) {
+      historyList.innerHTML = `<div class="info-row text-center text-muted small"><div class="w-100 py-2">ไม่มีประวัติเบิกสวัสดิการ</div></div>`;
+    } else {
+      data.welfareHistory.forEach(item => { 
+        let badgeClass = item.status.includes('อนุมัติ') ? 'bg-success text-white' : 'bg-warning text-dark';
+        historyList.innerHTML += `<div class="info-row"><span class="info-label text-dark">${item.type}</span><span class="badge ${badgeClass} rounded-pill">${item.status}</span></div>`; 
+      });
+    }
     
-    const historyList = document.getElementById('dashWelfareList'); historyList.innerHTML = "";
-    if((data.welfareHistory || []).length === 0) { historyList.innerHTML = `<div class="info-row text-center text-muted small"><div class="w-100 py-2">ไม่มีประวัติเบิกสวัสดิการ</div></div>`; } 
-    else { data.welfareHistory.forEach(item => { let badgeClass = item.status.includes('อนุมัติ') ? 'bg-success text-white' : 'bg-warning text-dark'; historyList.innerHTML += `<div class="info-row"><span class="info-label text-dark">${item.type}</span><span class="badge ${badgeClass} rounded-pill">${item.status}</span></div>`; }); }
-    
+    document.getElementById('systemLoading').style.display = 'none';
     document.getElementById('dashboardView').style.display = 'block';
   }
 
-  // 🎮 ฟังก์ชันชวนเพื่อนและ Mission
+  function openProfileEditor() {
+    if(!cachedUserData) return; const d = cachedUserData;
+    document.getElementById('editMemId').value = d.memberId || "";
+    let nId = String(d.nationalId || "").replace(/\D/g, ''); document.getElementById('editNatId').value = nId.length===13 ? `${nId.substring(0,5)}XXXX${nId.substring(9,13)}` : d.nationalId;
+    
+    if(d.prefix) document.getElementById('editPrefix').value = d.prefix; document.getElementById('editName').value = d.fullName || ""; document.getElementById('editBirth').value = d.birthDate || ""; document.getElementById('editPhone').value = (d.phone||"").replace(/\D/g, '');
+    document.getElementById('editEmail').value = d.email || ""; if(d.center && d.center !== "-") document.getElementById('editCenter').value = d.center; if(d.address && d.address !== "-") document.getElementById('editAddress').value = d.address;
+    if(d.village && document.getElementById('editVillage').querySelector(`option[value="${d.village}"]`)) { document.getElementById('editVillage').value = d.village; }
+
+    if(d.education) document.getElementById('editEdu').value = d.education; if(d.occupation) document.getElementById('editOcc').value = d.occupation; document.getElementById('editInc').value = d.income || ""; document.getElementById('editFam').value = d.familyMembers || ""; document.getElementById('editDis').value = d.disabledPersons || ""; if(d.houseType) document.getElementById('editHouseT').value = d.houseType; if(d.houseCondition) document.getElementById('editHouseC').value = d.houseCondition;
+    
+    document.getElementById('editBen1N').value = d.beneficiary1_name || ""; document.getElementById('editBen1R').value = d.beneficiary1_relation || ""; 
+    document.getElementById('editBen2N').value = d.beneficiary2_name || ""; document.getElementById('editBen2R').value = d.beneficiary2_relation || ""; 
+    document.getElementById('editBen3N').value = d.beneficiary3_name || ""; document.getElementById('editBen3R').value = d.beneficiary3_relation || "";
+    
+    document.getElementById('dashboardView').style.display = 'none'; document.getElementById('editProfileView').style.display = 'block'; window.scrollTo(0,0);
+  }
+  
+  function closeProfileEditor() { document.getElementById('editProfileView').style.display = 'none'; document.getElementById('dashboardView').style.display = 'block'; window.scrollTo(0,0); }
+
   function shareRefLink() {
-    const url = `https://liff.line.me/${LIFF_ID}?ref=${cachedUserData.memberId}`;
+    const url = `https://liff.line.me/${CWF_CONFIG.LIFF_ID}?ref=${cachedUserData.memberId}`;
     if (liff.isInClient() && liff.isApiAvailable('shareTargetPicker')) {
       liff.shareTargetPicker([{ type: "flex", altText: "ชวนเพื่อน", contents: { type: "bubble", body: { type: "box", layout: "vertical", contents: [{ type: "text", text: "สมัครกองทุนสวัสดิการชุมชนคลิก!", weight: "bold", size: "md", color: "#0F172A" }] }, footer: { type: "box", layout: "vertical", contents: [{ type: "button", action: { type: "uri", label: "สมัครสมาชิก", uri: url }, style: "primary", color: "#2563EB" }] } } }]);
     } else { navigator.clipboard.writeText(url); Swal.fire('สำเร็จ', 'คัดลอกลิงก์เรียบร้อย', 'success'); }
   }
-  async function dailyCheckIn() {
-    if(!LOCAL_API_URL) return;
-    Swal.fire({ title: 'กำลังเช็คอิน...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
-    try {
-      const res = await fetch(LOCAL_API_URL, { method: 'POST', body: JSON.stringify({ action: 'earnPoints', uid: document.getElementById('uid').value, missionType: 'dailyLogin' }) }).then(r=>r.json());
-      if (res.status === 'success') { document.getElementById('dashCwfPoints').innerText = res.newPoints; Swal.fire({ icon: 'success', title: 'เยี่ยมมาก!', text: res.message, confirmButtonColor: '#10B981' }); } 
-      else { Swal.fire({ icon: 'info', title: 'แจ้งเตือน', text: res.message }); }
-    } catch (e) { Swal.fire('Error', 'ไม่สามารถประมวลผลได้', 'error'); }
-  }
-  async function shareNewsMission() {
-    if(!LOCAL_API_URL) return;
-    if (!liff.isLoggedIn()) { Swal.fire('เตือน', 'กรุณาล็อกอิน', 'warning'); return liff.login(); }
-    if (!liff.isApiAvailable('shareTargetPicker')) { Swal.fire('ขออภัย', 'แชร์ได้บนมือถือเท่านั้น', 'warning'); return; }
-    try {
-      const bannerImageUrl = "https://images.unsplash.com/photo-1555421689-d68471e189f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
-      const res = await liff.shareTargetPicker([{
-        type: "flex", altText: "ข่าวสารกองทุนสวัสดิการชุมชน",
-        contents: {
-          type: "bubble", hero: { type: "image", url: bannerImageUrl, size: "full", aspectRatio: "20:13", aspectMode: "cover" },
-          body: { type: "box", layout: "vertical", contents: [ { type: "text", text: "กองทุนสวัสดิการชุมชน", weight: "bold", size: "sm", color: "#2563EB" }, { type: "text", text: "มาร่วมสร้างความมั่นคงและคุณภาพชีวิตที่ดี", wrap: true, color: "#6B7280", size: "sm", margin: "md" } ] },
-          footer: { type: "box", layout: "vertical", contents: [{ type: "button", style: "primary", height: "sm", color: "#2563EB", action: { type: "uri", label: "เข้าระบบ", uri: `https://liff.line.me/${LIFF_ID}` } }] }
-        }
-      }]);
-      if (res) {
-        Swal.fire({ title: 'กำลังประมวลผล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
-        const earnRes = await fetch(LOCAL_API_URL, { method: 'POST', body: JSON.stringify({ action: 'earnPoints', uid: document.getElementById('uid').value, missionType: 'lineShare' }) }).then(r => r.json());
-        if(earnRes.status === 'success'){ document.getElementById('dashCwfPoints').innerText = earnRes.newPoints; Swal.fire({ icon: 'success', title: 'แชร์สำเร็จ!', text: earnRes.message, confirmButtonColor: '#10B981' }); } 
-        else { Swal.fire({ icon: 'info', title: 'แจ้งเตือน', text: earnRes.message }); }
+
+  function updateTierOnScreen(points) {
+      let tierName = "ร่วมใจ (Unity)"; let tierColor = "#64748B"; 
+      if (points >= 5000) { tierName = "เกียรติภูมิชุมชน (Legacy)"; tierColor = "#D97706"; }
+      else if (points >= 2500) { tierName = "ทรงคุณค่า (Precious)"; tierColor = "#1D4ED8"; }
+      else if (points >= 1000) { tierName = "ต้นแบบ (Role Model)"; tierColor = "#059669"; }
+      else if (points >= 600) { tierName = "อุทิศตน (Dedication)"; tierColor = "#7C3AED"; }
+      else if (points >= 300) { tierName = "แบ่งปัน (Sharing)"; tierColor = "#EA580C"; }
+      else if (points >= 100) { tierName = "เกื้อกูล (Solidarity)"; tierColor = "#0284C7"; }
+      
+      const tierBadge = document.getElementById('dashTierBadge');
+      if(tierBadge) {
+          tierBadge.innerHTML = `<i class="fa-solid fa-crown"></i> ${tierName}`;
+          tierBadge.style.backgroundColor = tierColor;
+          tierBadge.style.display = 'inline-flex';
       }
-    } catch(e) { console.error(e); }
   }
 </script>
 </body>
