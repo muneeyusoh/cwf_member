@@ -9,6 +9,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <!-- 🚀 โหลด Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
   <style>
     :root { --fintech-primary: #0A2540; --fintech-accent: #3B82F6; --fintech-success: #10B981; --bg-light: #F8FAFC; }
     body { background-color: var(--bg-light); font-family: 'Prompt', sans-serif; color: #1E293B; padding-bottom: 40px; }
@@ -34,7 +39,7 @@
 <body>
 <div id="loader">
   <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--fintech-success);" role="status"></div>
-  <p class="text-dark fw-bold">กำลังดึงข้อมูลบัญชีสมทบ...</p>
+  <p class="text-dark fw-bold">กำลังเชื่อมต่อฐานข้อมูล...</p>
 </div>
 
 <div class="app-header">
@@ -42,7 +47,7 @@
     <button onclick="liff.closeWindow()" class="btn btn-sm btn-outline-light rounded-circle px-2 py-1 me-2 border-0"><i class="fa-solid fa-arrow-left"></i></button>
     <h5 class="fw-bold mb-0">สมทบเงินกองทุนรายปี</h5>
   </div>
-  <p class="opacity-75 small mb-0 text-start ps-4">ระบบเครือข่ายสวัสดิการแห่งชาติ</p>
+  <p class="opacity-75 small mb-0 text-start ps-4">เทศบาลตำบลสุคิริน</p>
 </div>
 
 <div class="container mb-5">
@@ -59,7 +64,6 @@
     </div>
     
     <form id="contribForm" onsubmit="submitContrib(event)">
-      <input type="hidden" name="action" value="handleContribution">
       <input type="hidden" id="uid" name="uid"> 
       <input type="hidden" id="fullName" name="fullName">
       
@@ -106,12 +110,26 @@
 </div>
 
 <script>
-  const LIFF_ID = "2010977535-b13rVtsp"; 
-  const CENTRAL_API_URL = "https://script.google.com/macros/s/AKfycbxDpvQtOu9XX4CpEdZKPJTJN34WLMUBK9344-n-w3I1ul9VwdCLG9-l2-_vXTXoaOM55g/exec"; 
+  const LIFF_ID = "2010764982-RCKkyPZG"; // ใช้ LIFF_ID เดียวกับหน้า Index ได้เลย หรือเปลี่ยนตามต้องการ
   
-  let GAS_API_URL = localStorage.getItem('cwf_user_api'); 
+  // 🔑 ใส่กุญแจ Firebase ของคุณ
+  const firebaseConfig = {
+    apiKey: "AIzaSyBs1G5k31100g6PeVvU5nUyz0QDB21jHpI",
+    authDomain: "smartwelf-f7d81.firebaseapp.com",
+    projectId: "smartwelf-f7d81",
+    storageBucket: "smartwelf-f7d81.firebasestorage.app",
+    messagingSenderId: "114126831149",
+    appId: "1:114126831149:web:66ea766f6c558b159442a4",
+    measurementId: "G-LGGQC7R7E1"
+  };
+
+  if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
+
   let maxAllowed = 0;
-  let dynamicCommitteeList = [];
+  let dynamicCommitteeList = ["ประธานศูนย์ (ตัวอย่าง 1)", "เหรัญญิกศูนย์ (ตัวอย่าง 2)", "กรรมการอื่นๆ"]; // สามารถไปเพิ่มฐานข้อมูลกรรมการใน Firestore ทีหลังได้
 
   document.addEventListener("DOMContentLoaded", async () => {
     try {
@@ -119,45 +137,41 @@
       if (liff.isLoggedIn()) {
         const profile = await liff.getProfile();
         document.getElementById('uid').value = profile.userId;
-        
-        if (!GAS_API_URL) {
-            const routeRes = await fetch(CENTRAL_API_URL, { 
-                method: "POST", body: JSON.stringify({ action: "getUserRoute", uid: profile.userId }) 
-            }).then(r=>r.json());
-            
-            if (routeRes.status === 'success') {
-                GAS_API_URL = routeRes.apiUrl;
-                localStorage.setItem('cwf_user_api', GAS_API_URL);
-            } else {
-                document.getElementById('loader').style.display = 'none';
-                return Swal.fire('แจ้งเตือน', 'คุณยังไม่ได้เป็นสมาชิกกองทุนสวัสดิการ', 'warning').then(()=>liff.closeWindow());
-            }
-        }
-        
-        const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify({ action: "checkStatus", uid: profile.userId }) }).then(r=>r.json());
-        document.getElementById('loader').style.display = 'none';
-        
-        if(res.status === 'registered') {
-          document.getElementById('fullName').value = res.memberData.fullName;
-          document.getElementById('dashTotalContrib').innerText = (res.memberData.totalContribution || 0).toLocaleString();
-          maxAllowed = res.memberData.outstandingBalance || 0;
-          document.getElementById('debtText').innerText = maxAllowed.toLocaleString();
-          document.getElementById('amount').max = maxAllowed;
-          dynamicCommitteeList = res.memberData.committeeList || ["ไม่มีข้อมูลกรรมการในศูนย์นี้ (โปรดติดต่อแอดมิน)"];
-          
-          if(maxAllowed <= 0) {
-            Swal.fire({ title: 'ยอดเยี่ยม', text: 'คุณสมทบครบถ้วนแล้ว ไม่มียอดค้างชำระในปีนี้ครับ', icon: 'success', confirmButtonColor: '#10B981' }).then(()=>liff.closeWindow());
-          }
-        } else {
-          localStorage.removeItem('cwf_user_api');
-          Swal.fire('ข้อผิดพลาด', 'ไม่พบข้อมูลสมาชิกของคุณในระบบ', 'error').then(()=>liff.closeWindow());
-        }
+        await checkMemberData(profile.userId);
       } else { liff.login(); }
     } catch (err) { 
         document.getElementById('loader').style.display = 'none';
-        Swal.fire('Error', 'เซิร์ฟเวอร์ขัดข้อง โปรดลองใหม่ภายหลัง', 'error');
+        Swal.fire('Error', 'ไม่สามารถโหลดระบบ LINE ได้', 'error');
     }
   });
+
+  async function checkMemberData(uid) {
+    try {
+      // 🚀 ดึงข้อมูลจาก Firestore
+      const docRef = db.collection("members").doc(uid);
+      const docSnap = await docRef.get();
+      
+      document.getElementById('loader').style.display = 'none';
+
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        document.getElementById('fullName').value = data.fullName;
+        document.getElementById('dashTotalContrib').innerText = (data.totalContribution || 0).toLocaleString();
+        
+        maxAllowed = data.outstandingBalance || 0;
+        document.getElementById('debtText').innerText = maxAllowed.toLocaleString();
+        document.getElementById('amount').max = maxAllowed;
+        
+        if(maxAllowed <= 0) {
+          Swal.fire({ title: 'ยอดเยี่ยม', text: 'คุณสมทบครบถ้วนแล้ว ไม่มียอดค้างชำระครับ', icon: 'success', confirmButtonColor: '#10B981' }).then(()=>liff.closeWindow());
+        }
+      } else {
+        Swal.fire('แจ้งเตือน', 'คุณยังไม่ได้ลงทะเบียนสมาชิก', 'warning').then(()=>liff.closeWindow());
+      }
+    } catch (error) {
+       Swal.fire('Error', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error');
+    }
+  }
 
   function validateAmount(input) {
     if (parseFloat(input.value) > maxAllowed) {
@@ -219,7 +233,7 @@
   async function submitContrib(e) {
     e.preventDefault(); 
     const btn = document.getElementById('submitBtn'); 
-    btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>กำลังอัปโหลดข้อมูล...';
+    btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>กำลังบันทึกข้อมูล...';
     
     const formDataObj = Object.fromEntries(new FormData(e.target));
     if (formDataObj.paymentType === 'transfer') {
@@ -233,13 +247,25 @@
       delete formDataObj.slipBase64; delete formDataObj.slipFileName;
     }
     
+    // เตรียมข้อมูลส่งเข้า Firestore (แฟ้ม transactions)
+    const transactionData = {
+        uid: formDataObj.uid,
+        fullName: formDataObj.fullName,
+        type: "สมทบเงิน",
+        amount: parseFloat(formDataObj.amount),
+        paymentMethod: formDataObj.paymentMethod,
+        slipBase64: formDataObj.slipBase64 || null,
+        status: "รอตรวจสอบ",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
     try {
-      const res = await fetch(GAS_API_URL, { method: "POST", body: JSON.stringify(formDataObj) }).then(r=>r.json());
-      if(res.status === 'success') {
-        Swal.fire({ title: 'สำเร็จ', text: 'บันทึกรายการเรียบร้อย คณะกรรมการกำลังตรวจสอบครับ', icon: 'success', confirmButtonColor: '#10B981' }).then(()=>liff.closeWindow());
-      } else { Swal.fire('ข้อผิดพลาด', res.message, 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> ยืนยันทำรายการ'; }
+      // 🚀 บันทึกลงแฟ้ม transactions
+      await db.collection("transactions").add(transactionData);
+      Swal.fire({ title: 'สำเร็จ', text: 'บันทึกรายการเรียบร้อย คณะกรรมการกำลังตรวจสอบครับ', icon: 'success', confirmButtonColor: '#10B981' }).then(()=>liff.closeWindow());
     } catch (err) {
-      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> ยืนยันทำรายการ';
+      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อฐานข้อมูลได้', 'error'); 
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i> ยืนยันทำรายการ';
     }
   }
 </script>
